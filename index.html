@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Castlevania: Bloodlines Password Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Spectral:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one narrow column — setup controls, then a wrapping wall of 4x4 password slates. Single dark castle look. */
+:root {
+  color-scheme: dark;
+  --bg: #15121a;
+  --stone: #221d29;
+  --stone-edge: #3a3244;
+  --fg: #e9e2d4;
+  --muted: #a69cae;
+  --gold: #d9a441;
+  --blood: #b8333b;
+  --water: #4f8fd6;
+  --steel: #c9ccd4;
+  --rose: #e08a86;
+  --navy: #2f3f9e;
+  --gem: #3d8fe0;
+  --axe: #767a86;
+  --axe-far: #5a5d68;
+  --font-display: "IM Fell English SC", "Times New Roman", serif;
+  --font-body: "Spectral", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 48px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 5vw, 2.8rem); line-height: 1.1; margin: 0; color: var(--gold); text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+.entry { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.field { display: grid; gap: 6px; }
+label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+#name { font-family: var(--font-mono); font-size: 1.4rem; letter-spacing: .3em; width: 13ch; max-width: 100%; padding: 8px 12px; background: var(--stone); color: var(--fg); border: 1px solid var(--stone-edge); border-radius: 4px; text-transform: uppercase; }
+#name:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.cells { display: flex; gap: 4px; }
+.cell { width: 1.6em; height: 1.9em; display: grid; place-items: center; font-family: var(--font-mono); background: var(--stone); border-bottom: 2px solid var(--stone-edge); color: var(--fg); }
+.cell.bad { color: var(--blood); }
+fieldset.quest { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.quest legend { padding: 0; margin-bottom: 6px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--stone-edge); border-radius: 4px; overflow: hidden; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { cursor: pointer; padding: 9px 14px; font-family: var(--font-body); font-size: 15px; letter-spacing: 0; text-transform: none; color: var(--muted); background: var(--stone); }
+.seg label + input + label { border-left: 1px solid var(--stone-edge); }
+.seg input:checked + label { background: var(--gold); color: var(--bg); font-weight: 600; }
+.seg input:focus-visible + label { outline: 2px solid var(--gold); outline-offset: -2px; }
+.hint { font-size: 14px; color: var(--muted); margin: 0; flex-basis: 100%; max-width: 70ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 20px; height: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
+.slate { background: var(--stone); border: 1px solid var(--stone-edge); border-radius: 6px; padding: 12px; display: grid; gap: 10px; }
+.slate h2 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; color: var(--fg); }
+.slate h2 small { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+.board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.sq { aspect-ratio: 1; max-width: 100%; background: var(--bg); border: 1px solid var(--stone-edge); border-radius: 3px; display: grid; place-items: center; }
+.sq svg { width: 100%; height: 100%; }
+select { font-family: var(--font-body); font-size: 15px; padding: 8px 10px; background: var(--stone); color: var(--fg); border: 1px solid var(--stone-edge); border-radius: 4px; }
+select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.slate h2 small { font-family: var(--font-body); font-size: 12px; color: var(--muted); }
+[hidden] { display: none !important; }
+footer { font-size: 13px; color: var(--muted); }
+footer code { font-family: var(--font-mono); font-size: 12px; }
+@media (prefers-reduced-motion: no-preference) { .sq svg { transition: transform .15s; } .slate:hover .sq svg { transform: scale(1.06); } }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-axe" viewBox="0 0 24 24">
+      <path d="M7.4 5.6 L5.2 2.6 Q2.4 8.4 3.3 13.2 Q3.6 15.6 4.2 17.2 L7.4 12.4 Z" fill="var(--axe)" stroke="var(--navy)" stroke-width="0.8" stroke-linejoin="round"/>
+      <path d="M5.2 2.6 Q2.4 8.4 3.3 13.2 Q3.6 15.6 4.2 17.2 Q4.2 15.4 4.1 13 Q3.5 8.4 5.2 2.6 Z" fill="var(--fg)"/>
+      <rect x="7.3" y="1.2" width="2.4" height="21.6" rx="0.5" fill="var(--gold)"/>
+      <rect x="7.3" y="1.2" width="2.4" height="1.6" rx="0.5" fill="var(--steel)"/>
+      <path d="M6.6 6 Q12.2 5.8 15.9 1.2 Q20.4 6.2 19.6 12.4 Q18.8 17.8 14.8 21.2 Q13 20 13 17.8 L13 15.2 Q12.4 12.8 9.8 12.4 L6.6 12.4 Z" fill="var(--axe)" stroke="var(--navy)" stroke-width="0.8" stroke-linejoin="round"/>
+      <path d="M15.9 1.2 Q20.4 6.2 19.6 12.4 Q18.8 17.8 14.8 21.2 Q17.8 17.4 18.3 12.4 Q18.8 6.4 15.9 1.2 Z" fill="var(--fg)"/>
+    </symbol>
+    <symbol id="i-emblem" viewBox="0 0 24 24">
+      <g id="wing-l">
+        <path d="M12.3 11.9 C10.6 11.6 9.9 10 9.7 7.8 C9.4 4.2 7.6 1.6 4.6 1.3 Q2.8 1.1 1.2 1.2 Q3 4.6 1.6 7.8 Q3.6 9 1.8 12.2 Q4.2 12.8 4.4 16.4 Q8.4 14.6 12.3 16.8 Z" fill="var(--rose)" stroke="var(--navy)" stroke-width="0.9" stroke-linejoin="round"/>
+        <path d="M9.4 9.4 Q5.6 8.8 1.9 7.9 M10.4 12.6 Q6.4 12.2 2.1 12.1 M10.8 14.6 Q7.2 14.8 4.5 16.2 M8.6 6.4 Q5.4 4 1.6 1.6" stroke="var(--fg)" stroke-width="0.6" fill="none" opacity=".8"/>
+      </g>
+      <use href="#wing-l" transform="translate(24 0) scale(-1 1)"/>
+      <path d="M11.27 5.5 H12.73 V9.8 H18.5 V11.3 H12.73 V17.1 H11.27 V11.3 H5.5 V9.8 H11.27 Z" fill="var(--fg)" stroke="var(--navy)" stroke-width="0.7" stroke-linejoin="round"/>
+      <g fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path id="curl-l" d="M10.7 17.7 V19.4 Q10.7 20.7 9.3 20.7 Q8 20.7 7.6 19.4 Q7.2 17.9 5.8 17.9 H3.6 Q1.8 17.9 1.8 19.35 Q1.8 20.8 3.5 20.8 Q5 20.8 5 19.7"/>
+        <use href="#curl-l" transform="translate(24 0) scale(-1 1)"/>
+      </g>
+      <g fill="none" stroke="var(--steel)" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round">
+        <path id="curl-line-l" d="M10.7 17.9 V19.4 Q10.7 20.7 9.3 20.7 Q8 20.7 7.6 19.4 Q7.2 17.9 5.8 17.9 H3.6 Q1.8 17.9 1.8 19.35 Q1.8 20.8 3.5 20.8 Q5 20.8 5 19.7"/>
+        <use href="#curl-line-l" transform="translate(24 0) scale(-1 1)"/>
+      </g>
+    </symbol>
+    <symbol id="i-gem" viewBox="0 0 24 24">
+      <clipPath id="gem-clip"><ellipse cx="12" cy="12" rx="3.7" ry="6.3"/></clipPath>
+      <ellipse cx="12" cy="12" rx="3.7" ry="6.3" fill="var(--gem)"/>
+      <path d="M7 14.6 Q12 16.6 17 14.6 V19 H7 Z" fill="var(--navy)" opacity=".75" clip-path="url(#gem-clip)"/>
+      <ellipse cx="12" cy="12" rx="3.7" ry="6.3" fill="none" stroke="var(--navy)" stroke-width="0.9"/>
+      <path d="M11.4 7 L11.85 9.2 L13.9 9.65 L11.85 10.1 L11.4 12.3 L10.95 10.1 L8.9 9.65 L10.95 9.2 Z" fill="var(--fg)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <h1>Castlevania: Bloodlines Password Generator</h1>
+    <p class="sub">Pick a character, a difficulty and your version of the game. Every stage password appears below, ready to copy onto the password grid.</p>
+  </header>
+
+  <div class="entry">
+    <fieldset class="field quest">
+      <legend>Character</legend>
+      <div class="seg">
+        <input type="radio" name="char" id="c0" value="0" checked><label for="c0">John Morris</label>
+        <input type="radio" name="char" id="c1" value="1"><label for="c1">Eric Lecarde</label>
+      </div>
+    </fieldset>
+    <fieldset class="field quest">
+      <legend>Difficulty</legend>
+      <div class="seg">
+        <input type="radio" name="diff" id="d1" value="1"><label for="d1">Easy</label>
+        <input type="radio" name="diff" id="d2" value="2" checked><label for="d2">Normal</label>
+        <input type="radio" name="diff" id="d3" value="3"><label for="d3">Expert</label>
+      </div>
+    </fieldset>
+    <fieldset class="field quest">
+      <legend>Version</legend>
+      <div class="seg">
+        <input type="radio" name="ver" id="v0" value="0" checked><label for="v0">US / Europe</label>
+        <input type="radio" name="ver" id="v1" value="1"><label for="v1">Japan</label>
+      </div>
+    </fieldset>
+    <div class="field" id="livesField">
+      <label for="lives">Rest (lives)</label>
+      <select id="lives"></select>
+    </div>
+    <div class="field" id="contField">
+      <label for="cont">Continues</label>
+      <select id="cont"></select>
+    </div>
+    <p class="hint" id="jpNote" hidden>Vampire Killer passwords don't store lives or continues. Lives come from the Players setting in Options, and you get 4 continues on Easy and 2 otherwise.</p>
+  </div>
+
+  <div class="legend" aria-label="Icon key">
+    <span><svg><use href="#i-emblem"/></svg>Emblem</span>
+    <span><svg><use href="#i-axe"/></svg>Axe</span>
+    <span><svg><use href="#i-gem"/></svg>Gem</span>
+    <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="var(--stone-edge)"/></svg>Empty</span>
+  </div>
+
+  <div class="grid" id="out"></div>
+
+  <footer>US / Europe covers Castlevania: Bloodlines and Castlevania: The New Generation, including the Anniversary Collection, Mega Drive Mini and Switch Online releases. Japan covers Vampire Killer. Built from each version's own password check and password generator. The game can make eight different passwords for the same setup; this page always shows the same one, and all eight work.</footer>
+</div>
+
+<script>
+// Stage values the password stores (RAM $FFFB2C) and where each one starts you.
+const STAGES = [
+  [0, "Stage 1", ""], [2, "Stage 2", ""], [4, "Stage 3", ""], [6, "Stage 4", ""],
+  [8, "Stage 5", ""], [10, "Stage 6", ""],
+  [13, "Stage 6-6", "password only"], [14, "Stage 6-8", "password only"], [15, "Stage 6-11", "password only"]
+];
+// Vampire Killer keeps a checkpoint partway through every stage.
+const STAGES_JP = [
+  [0, "Stage 1-1", ""], [1, "Stage 1-10", ""], [2, "Stage 2-1", ""], [3, "Stage 2-6", ""],
+  [4, "Stage 3-1", ""], [5, "Stage 3-8", ""], [6, "Stage 4-1", ""], [7, "Stage 4-10", ""],
+  [8, "Stage 5-1", ""], [9, "Stage 5-8", ""], [10, "Stage 6-1", ""], [11, "Stage 6-4", ""],
+  [13, "Stage 6-6", "password only"], [14, "Stage 6-8", "password only"], [15, "Stage 6-11", "password only"]
+];
+
+// Mirrors the game's encoder ($004750 in the US version) with its random key fixed at 0.
+// diff is the value the game stores: 1-3 in US / Europe, 0-2 in Japan.
+function encode(diff, lives, ch, stage, cont, k = 0) {
+  lives = Math.min(lives, 9);
+  const B0 = ((diff << 6) + 2 * lives + ch) & 0xff;
+  const B1 = (((stage & 15) << 3) + (cont & 7)) & 0xff;
+  let d = [B0 >> 4, B0 & 15, B1 >> 4, B1 & 15];
+  const c2 = (d[0] + d[1] + d[2] + d[3]) & 15;
+  d = d.map(x => (x + k) & 0xff);
+  const key = (2 * k) & 0xff;
+  const V = (d[0] << 15) + (d[1] << 10) + (d[2] << 5) + d[3];
+  const a = (V >> 16) & 0xff, v2 = (V >> 8) & 0xff, v3 = V & 0xff;
+  const b = v2 >> 4, c = v2 & 15, dd = v3 >> 4, e = v3 & 15;
+  const c1 = (a + b + c + dd + e + key + c2 + 6) & 15;
+  const P = [((b << 4) + c1) & 0xff, ((c << 4) + a) & 0xff, ((c2 << 4) + e) & 0xff, ((key << 4) + dd) & 0xff];
+  const cells = [];
+  for (let r = 0; r < 4; r++) for (let col = 0; col < 4; col++) cells.push((P[r] >> (6 - 2 * col)) & 3);
+  return cells; // 0 empty, 1 emblem, 2 axe, 3 gem
+}
+
+const ICON = [null, "i-emblem", "i-axe", "i-gem"];
+const LABEL = ["empty", "emblem", "axe", "gem"];
+// Where each icon sits in its square, measured from the game's password screen (square = 24 units).
+const PLACE = ["", 'x="4.22" y="6.74" width="16.56" height="16.56"', 'x="4.71" y="3.42" width="17.45" height="17.45"', 'x="1.2" y="3.7" width="21.6" height="21.6"'];
+const $ = id => document.getElementById(id);
+for (let i = 0; i <= 9; i++) $("lives").add(new Option(String(i), String(i)));
+for (let i = 0; i <= 7; i++) $("cont").add(new Option(String(i), String(i)));
+$("lives").value = "2"; $("cont").value = "2";
+
+function render() {
+  const jp = $("v1").checked;
+  const ch = $("c1").checked ? 1 : 0;
+  const diff = Number(document.querySelector('input[name="diff"]:checked').value);
+  const lives = Number($("lives").value), cont = Number($("cont").value);
+  $("livesField").hidden = jp; $("contField").hidden = jp; $("jpNote").hidden = !jp;
+  $("out").innerHTML = (jp ? STAGES_JP : STAGES).map(([v, name, note]) => {
+    const pw = jp ? encode(diff - 1, 0, ch, v, 0) : encode(diff, lives, ch, v, cont);
+    const sq = pw.map(p => `<div class="sq" title="${LABEL[p]}">${ICON[p] ? `<svg role="img" viewBox="0 0 24 24" aria-label="${LABEL[p]}"><use href="#${ICON[p]}" ${PLACE[p]}/></svg>` : ""}</div>`).join("");
+    return `<section class="slate"><h2>${name}${note ? `<small>${note}</small>` : ""}</h2><div class="board">${sq}</div></section>`;
+  }).join("");
+  try { localStorage.setItem("cvb-setup", JSON.stringify({ jp, ch, diff, lives, cont })); } catch (e) {}
+}
+
+try {
+  const s = JSON.parse(localStorage.getItem("cvb-setup") || "null");
+  if (s) { $("c" + s.ch).checked = true; $("d" + s.diff).checked = true; $("lives").value = String(s.lives); $("cont").value = String(s.cont); if (s.jp) $("v1").checked = true; }
+} catch (e) {}
+document.querySelectorAll('input[name="ver"], input[name="char"], input[name="diff"]').forEach(el => el.addEventListener("change", render));
+$("lives").addEventListener("change", render); $("cont").addEventListener("change", render);
+render();
+</script>
+
+</body>
+</html>
