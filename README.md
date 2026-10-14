@@ -17,7 +17,7 @@ It's a single HTML file with nothing to install. You can also download `index.ht
 - Easy, Normal or Expert (an Expert password also unlocks Expert mode)
 - US / Europe: any number of lives (REST 0–9) and continues (0–7), and passwords for the start of all six stages
 - Japan: passwords for the start and the mid-stage checkpoint of every stage (1-1, 1-10, 2-1, 2-6, 3-1, 3-8, 4-1, 4-10, 5-1, 5-8, 6-1, 6-4). Vampire Killer passwords don't store lives or continues.
-- Three extra starting points in stage 6 (6-6, 6-8 and 6-11) that the game itself never gives out a password for
+- Three extra starting points in stage 6 (6-6, 6-8 and 6-11) that the game itself never gives out a password.
 
 ## How the password works
 
